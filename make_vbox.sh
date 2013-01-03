@@ -1,6 +1,9 @@
-mkdir vbox
+#!/bin/bash
+set -e
 
-BOXNAME=ubuntu-12.04.1-server-amd64-vagrant
+mkdir -p vbox
+
+BOXNAME=`perl -ne 'chomp and print' BOXNAME`
 
 VBoxManage createvm \
   --name $BOXNAME \
@@ -23,10 +26,6 @@ VBoxManage storagectl $BOXNAME \
   --add ide \
   --controller PIIX4 \
   --hostiocache on
-
-# create controller before attaching
-# http://www.trimentation.com/wp/?p=85
-VBoxManage storagectl $BOXNAME --name "IDE Controller" --add ide
 
 VBoxManage storageattach $BOXNAME \
   --storagectl "IDE Controller" \
