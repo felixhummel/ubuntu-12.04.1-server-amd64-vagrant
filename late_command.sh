@@ -21,6 +21,8 @@ sed "s/quiet splash//" /etc/default/grub > /tmp/grub
 mv /tmp/grub /etc/default/grub
 update-grub
 
+# kernel headers for virtualbox additions
+apt-get --yes install linux-headers-$(uname -r) dkms
 # clean up
 apt-get clean
 

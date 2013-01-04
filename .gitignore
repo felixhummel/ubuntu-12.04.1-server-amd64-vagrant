@@ -5,4 +5,5 @@ vbox
 .vagrant
 Vagrantfile
 package.box
+id_rsa
 
