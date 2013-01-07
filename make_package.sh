@@ -4,5 +4,5 @@ set -e
 
 BOXNAME=`perl -ne 'chomp and print' BOXNAME`
 
-vagrant package --base $BOXNAME
+vagrant package --base $BOXNAME --output $BOXNAME.iso
 
