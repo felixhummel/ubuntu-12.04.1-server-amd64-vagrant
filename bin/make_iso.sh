@@ -1,35 +1,39 @@
 #!/bin/bash
+# run as root (KISS)
 
 set -e
 
+iso_url=${ISO_URL:-http://ftp.tu-clausthal.de/pub/mirror/ubuntu/releases/12.04.1/ubuntu-12.04.1-server-amd64.iso}
+iso_file=$(basename $iso_url)
+iso_seed=$(basename $iso_file .iso)-vagrant.iso
+
 # mirrors: https://launchpad.net/ubuntu/+cdmirrors
-if [[ ! -f ubuntu-12.04.1-server-amd64.iso ]]; then
+if [[ ! -f $iso_file ]]; then
   echo 'get iso'
-  wget http://ftp.tu-clausthal.de/pub/mirror/ubuntu/releases/12.04.1/ubuntu-12.04.1-server-amd64.iso
-  wget http://ftp.tu-clausthal.de/pub/mirror/ubuntu/releases/12.04.1/MD5SUMS
-  grep ubuntu-12.04.1-server-amd64.iso MD5SUMS > iso.md5
+  wget $iso_url
+  grep $iso_file MD5SUMS > iso.md5
   md5sum -c iso.md5
+  rm iso.md5
 fi
 
-
-# -------[ root ]-------
 echo 'unpack iso'
-mount -o loop ubuntu-12.04.1-server-amd64.iso /mnt
-cp -a /mnt/ unpacked_iso
+mount -o loop $iso_file /mnt
+cp -a /mnt/ build/unpacked_iso
 umount /mnt
 
 echo 'patch initrd'
-mkdir initrd
-cd initrd/
-gunzip -c ../unpacked_iso/install/initrd.gz | cpio -id
-cp ../preseed.cfg .
-find . | cpio --create --format='newc' | gzip  > "../unpacked_iso/install/initrd.gz"
-cd ..
-rm -r initrd
+oldwd=`pwd`
+mkdir build/initrd
+cd build/initrd/
+gunzip -c $oldwd/build/unpacked_iso/install/initrd.gz | cpio -id
+cp $oldwd/templates/preseed.cfg .
+find . | cpio --create --format='newc' | gzip  > "$oldwd/build/unpacked_iso/install/initrd.gz"
+cd $oldwd
+rm -r build/initrd
 
 echo 'copy isolinux.cfg and late_command.sh'
-cp isolinux.cfg unpacked_iso/isolinux/isolinux.cfg
-cp late_command.sh unpacked_iso/
+cp templates/isolinux.cfg build/unpacked_iso/isolinux/isolinux.cfg
+cp templates/late_command.sh build/unpacked_iso/
 
 echo 'make iso'
 mkisofs -r -V "Ubuntu Server 12.04.1 Vagrant" \
@@ -37,9 +41,9 @@ mkisofs -r -V "Ubuntu Server 12.04.1 Vagrant" \
   -J -l -b isolinux/isolinux.bin \
   -c isolinux/boot.cat -no-emul-boot \
   -boot-load-size 4 -boot-info-table \
-  -o ubuntu-12.04.1-server-amd64-vagrant.iso unpacked_iso
+  -o $iso_seed build/unpacked_iso
 
 echo 'clean up'
-rm -r unpacked_iso/
+rm -r build/unpacked_iso/
 exit
 

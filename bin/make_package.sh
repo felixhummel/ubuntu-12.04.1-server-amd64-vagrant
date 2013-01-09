@@ -2,7 +2,7 @@
 
 set -e
 
-BOXNAME=`perl -ne 'chomp and print' BOXNAME`
+boxname=$(bin/boxname.sh)
 
-vagrant package --base $BOXNAME --output $BOXNAME.iso
+vagrant package --base $boxname --output $boxname.box
 

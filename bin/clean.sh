@@ -1,7 +1,7 @@
 #!/bin/bash
 
-BOXNAME=`perl -ne 'chomp and print' BOXNAME`
+boxname=`bin/boxname.sh`
 
-VBoxManage unregistervm $BOXNAME --delete
+VBoxManage unregistervm $boxname --delete
 
 
